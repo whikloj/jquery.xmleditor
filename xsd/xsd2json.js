@@ -35,7 +35,7 @@ function Xsd2Json(originatingXsdName, options) {
 		schemaURI: "",
 		rootElement: null
 	};
-	this.options = $.extend({}, defaults, options);
+	this.options = jQuery.extend({}, defaults, options);
 	
 	this.xsdManager = new SchemaManager(originatingXsdName, options);
 
@@ -119,7 +119,7 @@ function SchemaManager(originatingXsdName, options) {
 			globalNamespaces : {}
 	};
 	
-	this.options = $.extend({}, defaults, options);
+	this.options = jQuery.extend({}, defaults, options);
 	
 	var self = this;
 	
@@ -141,13 +141,13 @@ function SchemaManager(originatingXsdName, options) {
 	this.xsNS = "http://www.w3.org/2001/XMLSchema";
 	
 	/// Registering the "special" namespaces that are automatically added by web browsers
-	this.globalNamespaces = $.extend({}, options.globalNamespaces, {
+	this.globalNamespaces = jQuery.extend({}, options.globalNamespaces, {
 		"xml" : "http://www.w3.org/XML/1998/namespace",
 		"xmlns" : "http://www.w3.org/2000/xmlns/",
 		"html" : "http://www.w3.org/1999/xhtml/"
 	});
 	
-	$.each(this.globalNamespaces, function(prefix, namespaceUri) {
+	jQuery.each(this.globalNamespaces, function(prefix, namespaceUri) {
 		self.registerNamespace(namespaceUri);
 	});
 	
@@ -175,12 +175,12 @@ SchemaManager.prototype.importAjax = function(url, callback, failedLocalAttempt)
 	if (isHttpRequest && !failedLocalAttempt)
 		schemaPath = self.options.schemaURI + url.substring(url.lastIndexOf("/") + 1);
 	
-	$.ajax({
+	jQuery.ajax({
 		url: schemaPath,
 		dataType: "text",
 		async: false,
 		success: function(data){
-			var xsdDocument = $.parseXML(data).documentElement;
+			var xsdDocument = jQuery.parseXML(data).documentElement;
 			callback.call(self, xsdDocument, url);
 		}, error: function() {
 			if (!isHttpRequest || failedLocalAttempt)
@@ -266,7 +266,7 @@ SchemaManager.prototype.includeSchema = function(schemaLocation, namespaceIndex)
 	
 	// Check for duplicate include by namespace and schemaLocation
 	if (namespaceIndex in this.includes) {
-		if ($.inArray(schemaLocation, this.includes[namespaceIndex]) != -1)
+		if (jQuery.inArray(schemaLocation, this.includes[namespaceIndex]) != -1)
 			return;
 		this.includes[namespaceIndex].push(schemaLocation);
 	} else {
@@ -361,7 +361,7 @@ SchemaManager.prototype.exportNamespaces = function() {
 	var namespaceRegistry = [];
 	for (var index in this.namespaceIndexes) {
 		var namespaceUri = this.namespaceIndexes[index];
-		$.each(this.originatingSchema.localNamespaces, function(key, val){
+		jQuery.each(this.originatingSchema.localNamespaces, function(key, val){
 			if (val == namespaceUri) {
 				namespaceRegistry.push({'prefix' : key, 'uri' : val});
 				return false;
@@ -399,12 +399,12 @@ SchemaManager.prototype.resolveTypeReferences = function(definition) {
 		// Process children
 		var self = this;
 		if (definition.elements) {
-			$.each(definition.elements, function(){
+			jQuery.each(definition.elements, function(){
 				self.resolveTypeReferences(this);
 			});
 		}
 		if (definition.attributes != null) {
-			$.each(definition.attributes, function(){
+			jQuery.each(definition.attributes, function(){
 				self.resolveTypeReferences(this);
 			});
 		}
@@ -472,7 +472,7 @@ SchemaManager.prototype.mergeType = function(base, type) {
 			var value = type[key];
 			if (value != null && base[key] == null){
 				base[key] = value;
-			} else if ($.isArray(value) && $.isArray(type[key])){
+			} else if (jQuery.isArray(value) && jQuery.isArray(type[key])){
 				base[key] = base[key].concat(value);
 			}
 		}
@@ -489,7 +489,7 @@ SchemaManager.prototype.mergeRef = function(base, ref) {
 
 //Register a namespace if it is new
 SchemaManager.prototype.registerNamespace = function(namespaceUri) {
-	var namespaceIndex = $.inArray(namespaceUri, this.namespaceIndexes);
+	var namespaceIndex = jQuery.inArray(namespaceUri, this.namespaceIndexes);
 	if (namespaceIndex == -1) {
 		this.namespaceIndexes.push(namespaceUri);
 		return this.namespaceIndexes.length - 1;
@@ -499,7 +499,7 @@ SchemaManager.prototype.registerNamespace = function(namespaceUri) {
 };
 
 SchemaManager.prototype.getNamespaceIndex = function(namespaceUri) {
-	return $.inArray(namespaceUri, this.namespaceIndexes);
+	return jQuery.inArray(namespaceUri, this.namespaceIndexes);
 };
 
 SchemaManager.prototype.getNamespaceUri = function(index) {
@@ -528,7 +528,7 @@ function SchemaProcessor(xsdDocument, xsdManager, schemaUrl, parentNSIndex) {
 	this.rootDefinitions = {};
 	
 	// Local namespace prefix registry
-	this.localNamespaces = $.extend({}, this.xsdManager.globalNamespaces);
+	this.localNamespaces = jQuery.extend({}, this.xsdManager.globalNamespaces);
 
 	this.xsPrefix = "xs:";
 	
