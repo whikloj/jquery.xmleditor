@@ -89,6 +89,9 @@ $.widget( "xml.xmlEditor", {
 		// Function triggered after uploading XML document, to interpret if the response was successful or not.  If upload failed, an error message should be returned.
 		submitResponseHandler : null,
 
+    // Strip baseUrl back to the server name before appending the schema path
+    absoluteSchemaUrl : false,
+
 		submitButtonConfigs : null,
 		// Event function trigger after an xml element is update via the gui
 		elementUpdated : undefined,
@@ -164,7 +167,7 @@ $.widget( "xml.xmlEditor", {
 			this.options.expandingTextAreas = false;
 		if (!vkbeautify)
 			this.options.prettyXML = false;
-		
+
 		if (typeof(this.options.schema) != 'function') {
 			// Turn relative paths into absolute paths for the sake of web workers
 			if (this.options.libPath) {
@@ -173,8 +176,17 @@ $.widget( "xml.xmlEditor", {
 				else this.libPath = this.options.libPath;
 			} else this.libPath = this.baseUrl + "lib/";
 			if ((typeof this.options.schema == 'string' || typeof this.options.schema instanceof String)
-					&& this.options.schema.indexOf('http') != 0)
-				this.options.schema = this.baseUrl + this.options.schema;
+					&& this.options.schema.indexOf('http') != 0) {
+			  if (this.options.absoluteSchemaUrl) {
+		      var absRegExp = /^https?:\/\/([^:\/]+)(:\d+)\//;
+		      if (absRegExp.test(this.baseUrl)) {
+		        var matches = this.baseUrl.match(absRegExp);
+		        var protocol = (/http:/.test(this.baseUrl) ? 'http' : 'https');
+		        this.options.schema = protocol + "://" + matches[1] + matches[2] + '/' + this.options.schema;
+		      }
+		    } else
+		      this.options.schema = this.baseUrl + this.options.schema;
+		  }
 		}
 		
 		this.loadSchema(this.options.schema);
